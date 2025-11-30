@@ -102,12 +102,14 @@
 #'                                "guess old", "no detection", "guess new")))
 #'
 #' # show directly in the viewer pane using the texPreview package:
+#' if(interactive()){
 #' texPreview::tex_preview(tex_lines = tex[[1]])
 #' texPreview::tex_preview(tex_lines = tex[[2]])
+#' }
 #'
 #' # or store them using the writeLines() command to use them in your LaTeX UI
-#' writeLines(tex[[1]], paste0(tempdir(), "MPT1.tex"))
-#' writeLines(tex[[2]], paste0(tempdir(), "MPT2.tex"))
+#' writeLines(tex[[1]], paste0(tempdir(), "/MPT1.tex"))
+#' writeLines(tex[[2]], paste0(tempdir(), "/MPT2.tex"))
 #'
 #'
 #' ############ example for "combine" mode: ############
@@ -126,10 +128,12 @@
 #'
 #'
 #' # show directly in the viewer pane using the texPreview package:
+#' if(interactive()){
 #' texPreview::tex_preview(tex_lines = tex)
+#' }
 #'
 #' # or store it using the writeLines() command to use it in your LaTeX UI
-#' writeLines(tex, paste0(tempdir(), "MPT.tex"))
+#' writeLines(tex, paste0(tempdir(), "/MPT.tex"))
 #'
 #'
 #' @importFrom utils modifyList
@@ -165,6 +169,9 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
   prc_text <- states
 
   # control variables
+  line_width <- min_arrow_width <- prc_box_width <- prc_box_height <- resp_box_width <-
+    resp_box_height <- resp_box_dist_x <- resp_box_dist_y <- stim_box_width <-
+    stim_box_height <- stim_txt_dist_y <- stim_txt_size <- probs_size <- NULL
   if (is.null(control)) control <- list()
   control_default <- get_default()
   control <- modifyList(control_default, control)

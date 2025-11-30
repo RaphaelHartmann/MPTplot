@@ -113,12 +113,14 @@ tex <- MPTplot(mdl, mode = "separate", stimuli = c("TARGET", "LURE"),
                                "guess old", "no detection", "guess new")))
 
 # show directly in the viewer pane using the texPreview package:
+if(interactive()){
 texPreview::tex_preview(tex_lines = tex[[1]])
 texPreview::tex_preview(tex_lines = tex[[2]])
+}
 
 # or store them using the writeLines() command to use them in your LaTeX UI
-writeLines(tex[[1]], paste0(tempdir(), "MPT1.tex"))
-writeLines(tex[[2]], paste0(tempdir(), "MPT2.tex"))
+writeLines(tex[[1]], paste0(tempdir(), "/MPT1.tex"))
+writeLines(tex[[2]], paste0(tempdir(), "/MPT2.tex"))
 
 
 ############ example for "combine" mode: ############
@@ -137,10 +139,12 @@ tex <- MPTplot(mdl, mode = "combine", stimuli = c("TARGET", "LURE"),
 
 
 # show directly in the viewer pane using the texPreview package:
+if(interactive()){
 texPreview::tex_preview(tex_lines = tex)
+}
 
 # or store it using the writeLines() command to use it in your LaTeX UI
-writeLines(tex, paste0(tempdir(), "MPT.tex"))
+writeLines(tex, paste0(tempdir(), "/MPT.tex"))
 
 
 }
