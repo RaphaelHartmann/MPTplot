@@ -86,7 +86,7 @@ order_branches <- function(tree_list) {
       current_branch <- strip_branch[[ind_new]]
       br = br + 1
     }
-    tree_list$ordered_branches[[tr]] <- tree_list$branches[[1]][order(tree_list$branch_order[[1]])]
+    tree_list$ordered_branches[[tr]] <- tree_list$branches[[tr]][order(tree_list$branch_order[[tr]])]
   }
   return(tree_list)
 }
