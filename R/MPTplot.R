@@ -1,4 +1,139 @@
 
+#' Generate LaTeX code for plotting multinomial processing tree models
+#'
+#' Generate LaTeX code for multiple binary multinomial processing trees (MPTs).
+#'   Either combine multiple MPTs with the same structure in one file or make
+#'   separate files for each MPT.
+#'
+#' @param mdl MDL model syntax file or character string defining the MPT model.
+#'   Trees must be separated with one or more empty lines. A line with only a
+#'   comment (using the hash symbol) will also count as an empty line.
+#' @param mode either of two options. "combine" lets you combine multiple trees
+#'   into one figure with stimuli condition and responses on right-hand side.
+#'   The mode "separate" will produce a figure per tree. The second option must
+#'   be used if the trees do not have the same structure of processes.
+#' @param stimuli vector of characters with stimulus conditions defining each tree.
+#' @param responses vector or list of characters giving the expected response for
+#'   each category in each tree. The MDL syntax defines the order of the possible
+#'   response categories; First line means first response category (e.g., "true"
+#'   or "correct"), the second line means second possible response category (e.g.,
+#'   "false" or "incorrect"), and so on.
+#'
+#'   * If \code{mode = "separate"} this must be a list of character vectors. The
+#'     number of list elements must equal the number of trees in the model. The
+#'     length of the character vectors must equal the number of possible response
+#'     categories per tree.
+#'
+#'   * If \code{mode = "combine"} this can, but must not be a list. A vector is
+#'     sufficient, since only the first list element would be taken anyway. Make
+#'     sure the order of response categories are the same in each tree in your
+#'     MDL syntax file or character string.
+#'
+#' @param states vector or list of characters giving the latent states that are
+#'   reached after each process. The order of the processes is alphabetical.
+#'   Therefore, the text for each state must be given in that order within a
+#'   vector, first for the process outcomes in the positive direction (e.g., "D")
+#'   and then for the process outcomes in the negative direction (e.g., "(1-D)").
+#'
+#'   * If \code{mode = "separate"} this must be a list of character vectors. The
+#'     number of list elements must equal the number of trees in the model. The
+#'     length of the character vectors must equal two times the number of
+#'     processes.
+#'
+#'   * If \code{mode = "combine"} this can, but must not be a list. A vector is
+#'     sufficient, since only the first list element would be taken anyway.
+#'
+#' @param control a named list of variables that control the shape of the figure.
+#'   Allowed list elements are:
+#'
+#'   * \code{line_width} length of process-outcome lines in x-dimension. Default
+#'     is 2.
+#'
+#'   * \code{min_arrow_width} length of minimal distance from last box of latent
+#'     states to the box of responses. Default is 1.5.
+#'
+#'   * \code{prc_box_width, prc_box_height} width and height of box for latent
+#'     states after each process outcome. Default is 2.5 and 1, respectively.
+#'
+#'   * \code{resp_box_width, resp_box_height} width and height of box for
+#'     responses. Default is 2 and 1, respectively.
+#'
+#'   * \code{resp_box_dist_x, resp_box_dist_y} distance in x- and y-dimension
+#'     between the boxes for the responses. This is only relevant for
+#'     \code{mode = "combine"} where the responses of all trees are placed on
+#'     the right-hand sinde of the figure. Default is 0.5 for both.
+#'
+#'   * \code{stim_box_width, stim_box_heigth} width and heigth of box for stimuli
+#'     in each tree in \code{mode = "separate"}. This will be placed at the
+#'     left-hand side of each tree at the starting node. Default is 2 and 1,
+#'     respectively.
+#'
+#'   * \code{stim_txt_dist_y} distance in y-dimension between response-boxes
+#'     and the stimulus name. This is only relevant for \code{mode = "combine"}.
+#'     Default is 0.5.
+#'
+#'   * \code{stim_txt_size} font size in LaTeX for the stimulus name. This can be
+#'     any LaTeX font size from "tiny" to "Huge". Default is "large".
+#'
+#'   * \code{probs_size} font size in LaTeX for the probability parameters (e.g.,
+#'     "D" and "(1-D)"). This can be any LaTeX font size from "tiny" to "Huge".
+#'     Default is "Large".
+#'
+#' @returns either a character vector (for \code{mode = "combine"}) or a list of
+#'   the same length as the number of trees (for \code{mode = "separate"}). This
+#'   character can be used with \code{writeLines()} to generate a LaTeX file.
+#'
+#' @examples
+#' ############ example for "separate" mode: ############
+#'
+#' mdl <- "
+#'   D_o + (1-D_o)*g
+#'   (1-D_o)*(1-g)
+#'
+#'   (1-D_n)*g
+#'   D_n + (1-D_n)*(1-g)
+#' "
+#'
+#' tex <- MPTplot(mdl, mode = "separate", stimuli = c("TARGET", "LURE"),
+#'                responses = list(c("old", "new"), c("old", "new")),
+#'                states = list(c("detect item\\\\as old", "guess old",
+#'                                "no detection", "guess new"),
+#'                              c("detect item\\\\as new",
+#'                                "guess old", "no detection", "guess new")))
+#'
+#' # show directly in the viewer pane using the texPreview package:
+#' texPreview::tex_preview(tex_lines = tex[[1]])
+#' texPreview::tex_preview(tex_lines = tex[[2]])
+#'
+#' # or store them using the writeLines() command to use them in your LaTeX UI
+#' writeLines(tex[[1]], paste0(tempdir(), "MPT1.tex"))
+#' writeLines(tex[[2]], paste0(tempdir(), "MPT2.tex"))
+#'
+#'
+#' ############ example for "combine" mode: ############
+#'
+#' mdl <- "
+#'   D + (1-D)*g
+#'   (1-D)*(1-g)
+#'
+#'   (1-D)*g
+#'   D + (1-D)*(1-g)
+#' "
+#'
+#' tex <- MPTplot(mdl, mode = "combine", stimuli = c("TARGET", "LURE"),
+#'                responses = c("old", "new"),
+#'                states = c("detect item", "guess old", "no detection", "guess new"))
+#'
+#'
+#' # show directly in the viewer pane using the texPreview package:
+#' texPreview::tex_preview(tex_lines = tex)
+#'
+#' # or store it using the writeLines() command to use it in your LaTeX UI
+#' writeLines(tex, paste0(tempdir(), "MPT.tex"))
+#'
+#'
+#' @importFrom utils modifyList
+#' @export
 MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, states = NULL, control = NULL) {
 
   lines <- read_lines(mdl)
@@ -77,7 +212,7 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
       tex_lines <- c(tex_lines, paste0("\\node[anchor=west] at (", pos_x, ", ", total_height, ") {\\", stim_txt_size, " ", stim_texts[tr], "};"), "")
       for (br in 1:n.branches[tr]) {
         pos_y <- body_height - (br-1)*(resp_box_height+resp_box_dist_y)
-        tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} ", cat_names[[tr]][trees$cat_pos[[tr]]][br], " \\end{tabular}};"))
+        tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} ", cat_names[[tr]][trees$ordered_cat_pos[[n.trees+1-tr]]][br], " \\end{tabular}};"))
       }
       tex_lines <- c(tex_lines, "")
     }
@@ -158,7 +293,7 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
       pos_x <- total_width[tr] - resp_box_width
       for (br in 1:n.branches[tr]) {
         pos_y <- body_height[tr] - (br-1)*(resp_box_height+resp_box_dist_y)
-        tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} ", cat_names[[tr]][trees$cat_pos[[tr]]][br], " \\end{tabular}};"))
+        tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} ", cat_names[[tr]][trees$ordered_cat_pos[[tr]]][br], " \\end{tabular}};"))
       }
       tex_lines <- c(tex_lines, "")
 
