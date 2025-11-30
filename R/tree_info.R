@@ -41,7 +41,7 @@ get_branches <- function(tree_list) {
   return(tree_list)
 }
 
-
+#' @importFrom stats runif
 test_tree <- function(tree_list) {
   for (tr in 1:length(tree_list$categories)) {
     param_env <- new.env()
@@ -53,7 +53,7 @@ test_tree <- function(tree_list) {
   }
 }
 
-
+#' @importFrom utils tail
 order_branches <- function(tree_list) {
   for (tr in 1:length(tree_list$categories)) {
     n.branches <- length(tree_list$branches[[tr]])
@@ -87,6 +87,7 @@ order_branches <- function(tree_list) {
       br = br + 1
     }
     tree_list$ordered_branches[[tr]] <- tree_list$branches[[tr]][order(tree_list$branch_order[[tr]])]
+    tree_list$ordered_cat_pos[[tr]] <- tree_list$cat_pos[[tr]][order(tree_list$branch_order[[tr]])]
   }
   return(tree_list)
 }
