@@ -72,12 +72,18 @@
 #'     and the stimulus name. This is only relevant for \code{mode = "combine"}.
 #'     Default is 0.5.
 #'
-#'   * \code{stim_txt_size} font size in LaTeX for the stimulus name. This can be
+#'   * \code{stim_font_size} font size in LaTeX for the stimulus name. This can be
 #'     any LaTeX font size from "tiny" to "Huge". Default is "large".
 #'
-#'   * \code{probs_size} font size in LaTeX for the probability parameters (e.g.,
+#'   * \code{probs_font_size} font size in LaTeX for the probability parameters (e.g.,
 #'     "D" and "(1-D)"). This can be any LaTeX font size from "tiny" to "Huge".
 #'     Default is "Large".
+#'
+#'   * \code{state_font_size} font size in LaTeX for the latent process states This
+#'     can be any LaTeX font size from "tiny" to "Huge". Default is "normalsize".
+#'
+#'   * \code{resp_font_size} font size in LaTeX for the possible responses. This
+#'     can be any LaTeX font size from "tiny" to "Huge". Default is "normalsize".
 #'
 #' @returns either a character vector (for \code{mode = "combine"}) or a list of
 #'   the same length as the number of trees (for \code{mode = "separate"}). This
@@ -171,7 +177,8 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
   # control variables
   line_width <- min_arrow_width <- prc_box_width <- prc_box_height <- resp_box_width <-
     resp_box_height <- resp_box_dist_x <- resp_box_dist_y <- stim_box_width <-
-    stim_box_height <- stim_txt_dist_y <- stim_txt_size <- probs_size <- NULL
+    stim_box_height <- stim_txt_dist_y <- stim_font_size <- probs_font_size <-
+    resp_font_size <- state_font_size <- NULL
   if (is.null(control)) control <- list()
   control_default <- get_default()
   control <- modifyList(control_default, control)
@@ -209,17 +216,17 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
   if (mode == "combine") {
 
     # start LaTeX document
-    tex_lines <- begin_lines()
+    tex_lines <- begin_lines(stim_font_size, probs_font_size, resp_font_size, state_font_size)
 
     # MAKE RESPONSE BOXES
     tex_lines <- c(tex_lines, "% stimulus name for each tree (from n.trees to 1) and corresponding responses:")
     stim_texts <- rev(stim_names)
     for (tr in 1:n.trees) {
       pos_x <- total_width - tr*(resp_box_width+resp_box_dist_x) + resp_box_dist_x
-      tex_lines <- c(tex_lines, paste0("\\node[anchor=west] at (", pos_x, ", ", total_height, ") {\\", stim_txt_size, " ", stim_texts[tr], "};"), "")
+      tex_lines <- c(tex_lines, paste0("\\node[anchor=west] at (", pos_x, ", ", total_height, ") {\\stimFontSize ", stim_texts[tr], "};"), "")
       for (br in 1:n.branches[tr]) {
         pos_y <- body_height - (br-1)*(resp_box_height+resp_box_dist_y)
-        tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} ", cat_names[[tr]][trees$ordered_cat_pos[[n.trees+1-tr]]][br], " \\end{tabular}};"))
+        tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} \\respFontSize ", cat_names[[tr]][trees$ordered_cat_pos[[n.trees+1-tr]]][br], " \\end{tabular}};"))
       }
       tex_lines <- c(tex_lines, "")
     }
@@ -260,15 +267,15 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
         ind_curr_prc <- which(trees$params[[1]]==curr_prc)
         curr_prc_text <- prc_text[[1]][c(ind_curr_prc, ind_curr_prc+n.params[1])]
         tex_lines <- c(tex_lines, paste0("% draw text box and lines for process ", curr_prc))
-        tex_lines <- c(tex_lines, paste0("\\draw [thick, rounded corners] (", pos_x, ", ", pos1_y, ") rectangle (", pos_x+prc_box_width, ", ", pos1_y+prc_box_height, ") node[pos=.5] {\\begin{tabular}{cc}", curr_prc_text[1], " \\end{tabular}};"))
-        tex_lines <- c(tex_lines, paste0("\\draw [thick, rounded corners] (", pos_x, ", ", pos2_y, ") rectangle (", pos_x+prc_box_width, ", ", pos2_y+prc_box_height, ") node[pos=.5] {\\begin{tabular}{cc}", curr_prc_text[2], " \\end{tabular}};"))
+        tex_lines <- c(tex_lines, paste0("\\draw [thick, rounded corners] (", pos_x, ", ", pos1_y, ") rectangle (", pos_x+prc_box_width, ", ", pos1_y+prc_box_height, ") node[pos=.5] {\\begin{tabular}{cc} \\stateFontSize ", curr_prc_text[1], " \\end{tabular}};"))
+        tex_lines <- c(tex_lines, paste0("\\draw [thick, rounded corners] (", pos_x, ", ", pos2_y, ") rectangle (", pos_x+prc_box_width, ", ", pos2_y+prc_box_height, ") node[pos=.5] {\\begin{tabular}{cc} \\stateFontSize ", curr_prc_text[2], " \\end{tabular}};"))
 
         new_pos_y <- mean(c(strip_branches_y[[ind_fill1]][curr_max], strip_branches_y[[ind_fill2]][curr_max]))
         strip_branches_y[[ind_fill1]][curr_max-1] <- new_pos_y
         strip_branches_y[[ind_fill2]][curr_max-1] <- new_pos_y
         tex_lines <- c(tex_lines, "%% You might want to change the text position of these lines:")
-        tex_lines <- c(tex_lines, paste0("\\draw [-latex, thick] (", pos_x-line_width, ", ", new_pos_y, ") -- node[above=3, align=center] {\\", probs_size," $", curr_prc, "$} (", pos_x, ", ", strip_branches_y[[ind_fill1]][curr_max], ");"))
-        tex_lines <- c(tex_lines, paste0("\\draw [-latex, thick] (", pos_x-line_width, ", ", new_pos_y, ") -- node[below=3, xshift=-13] {\\", probs_size, " $(1-", curr_prc, ")$} (", pos_x, ", ", strip_branches_y[[ind_fill2]][curr_max], ");"))
+        tex_lines <- c(tex_lines, paste0("\\draw [-latex, thick] (", pos_x-line_width, ", ", new_pos_y, ") -- node[above=3, align=center] {\\probsFontSize $", curr_prc, "$} (", pos_x, ", ", strip_branches_y[[ind_fill1]][curr_max], ");"))
+        tex_lines <- c(tex_lines, paste0("\\draw [-latex, thick] (", pos_x-line_width, ", ", new_pos_y, ") -- node[below=3, xshift=-13] {\\probsFontSize $(1-", curr_prc, ")$} (", pos_x, ", ", strip_branches_y[[ind_fill2]][curr_max], ");"))
         tex_lines <- c(tex_lines, "")
 
         len[max_list[[m]][1]] <- len[max_list[[m]][1]] - 1
@@ -293,14 +300,14 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
     for (tr in 1:n.trees) {
 
       # start LaTeX document
-      tex_lines <- begin_lines()
+      tex_lines <- begin_lines(stim_font_size, probs_font_size, resp_font_size, state_font_size)
 
       # MAKE RESPONSE BOXES
       tex_lines <- c(tex_lines, "% responses:")
       pos_x <- total_width[tr] - resp_box_width
       for (br in 1:n.branches[tr]) {
         pos_y <- body_height[tr] - (br-1)*(resp_box_height+resp_box_dist_y)
-        tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} ", cat_names[[tr]][trees$ordered_cat_pos[[tr]]][br], " \\end{tabular}};"))
+        tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} \\respFontSize ", cat_names[[tr]][trees$ordered_cat_pos[[tr]]][br], " \\end{tabular}};"))
       }
       tex_lines <- c(tex_lines, "")
 
@@ -340,15 +347,15 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
           ind_curr_prc <- which(trees$params[[tr]]==curr_prc)
           curr_prc_text <- prc_text[[tr]][c(ind_curr_prc, ind_curr_prc+n.params[1])]
           tex_lines <- c(tex_lines, paste0("% draw text box and lines for process ", curr_prc))
-          tex_lines <- c(tex_lines, paste0("\\draw [thick, rounded corners] (", pos_x, ", ", pos1_y, ") rectangle (", pos_x+prc_box_width, ", ", pos1_y+prc_box_height, ") node[pos=.5] {\\begin{tabular}{cc}", curr_prc_text[1], " \\end{tabular}};"))
-          tex_lines <- c(tex_lines, paste0("\\draw [thick, rounded corners] (", pos_x, ", ", pos2_y, ") rectangle (", pos_x+prc_box_width, ", ", pos2_y+prc_box_height, ") node[pos=.5] {\\begin{tabular}{cc}", curr_prc_text[2], " \\end{tabular}};"))
+          tex_lines <- c(tex_lines, paste0("\\draw [thick, rounded corners] (", pos_x, ", ", pos1_y, ") rectangle (", pos_x+prc_box_width, ", ", pos1_y+prc_box_height, ") node[pos=.5] {\\begin{tabular}{cc} \\stateFontSize ", curr_prc_text[1], " \\end{tabular}};"))
+          tex_lines <- c(tex_lines, paste0("\\draw [thick, rounded corners] (", pos_x, ", ", pos2_y, ") rectangle (", pos_x+prc_box_width, ", ", pos2_y+prc_box_height, ") node[pos=.5] {\\begin{tabular}{cc} \\stateFontSize ", curr_prc_text[2], " \\end{tabular}};"))
 
           new_pos_y <- mean(c(strip_branches_y[[ind_fill1]][curr_max], strip_branches_y[[ind_fill2]][curr_max]))
           strip_branches_y[[ind_fill1]][curr_max-1] <- new_pos_y
           strip_branches_y[[ind_fill2]][curr_max-1] <- new_pos_y
           tex_lines <- c(tex_lines, "%% You might want to change the text position of these lines:")
-          tex_lines <- c(tex_lines, paste0("\\draw [-latex, thick] (", pos_x-line_width, ", ", new_pos_y, ") -- node[above=3, align=center] {\\", probs_size," $", curr_prc, "$} (", pos_x, ", ", strip_branches_y[[ind_fill1]][curr_max], ");"))
-          tex_lines <- c(tex_lines, paste0("\\draw [-latex, thick] (", pos_x-line_width, ", ", new_pos_y, ") -- node[below=3, xshift=-13] {\\", probs_size, " $(1-", curr_prc, ")$} (", pos_x, ", ", strip_branches_y[[ind_fill2]][curr_max], ");"))
+          tex_lines <- c(tex_lines, paste0("\\draw [-latex, thick] (", pos_x-line_width, ", ", new_pos_y, ") -- node[above=3, align=center] {\\probsFontSize $", curr_prc, "$} (", pos_x, ", ", strip_branches_y[[ind_fill1]][curr_max], ");"))
+          tex_lines <- c(tex_lines, paste0("\\draw [-latex, thick] (", pos_x-line_width, ", ", new_pos_y, ") -- node[below=3, xshift=-13] {\\probsFontSize $(1-", curr_prc, ")$} (", pos_x, ", ", strip_branches_y[[ind_fill2]][curr_max], ");"))
           tex_lines <- c(tex_lines, "")
 
           len[max_list[[m]][1]] <- len[max_list[[m]][1]] - 1
@@ -356,7 +363,7 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
 
           # stimulus box on left side
           if (curr_max == 1) {
-            tex_lines <- c(tex_lines, paste0("\\draw [thick] (", 0, ", ", new_pos_y-0.5*stim_box_height, ") rectangle (", stim_box_width, ", ", new_pos_y+0.5*stim_box_height, ") node[pos=.5] {\\begin{tabular}{cc} ", stim_names[tr], " \\end{tabular}};"))
+            tex_lines <- c(tex_lines, paste0("\\draw [thick] (", 0, ", ", new_pos_y-0.5*stim_box_height, ") rectangle (", stim_box_width, ", ", new_pos_y+0.5*stim_box_height, ") node[pos=.5] {\\begin{tabular}{cc} \\stimFontSize ", stim_names[tr], " \\end{tabular}};"))
             tex_lines <- c(tex_lines, "")
           }
 

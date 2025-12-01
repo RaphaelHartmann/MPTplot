@@ -77,11 +77,15 @@ respectively.
 \item \code{stim_txt_dist_y} distance in y-dimension between response-boxes
 and the stimulus name. This is only relevant for \code{mode = "combine"}.
 Default is 0.5.
-\item \code{stim_txt_size} font size in LaTeX for the stimulus name. This can be
+\item \code{stim_font_size} font size in LaTeX for the stimulus name. This can be
 any LaTeX font size from "tiny" to "Huge". Default is "large".
-\item \code{probs_size} font size in LaTeX for the probability parameters (e.g.,
+\item \code{probs_font_size} font size in LaTeX for the probability parameters (e.g.,
 "D" and "(1-D)"). This can be any LaTeX font size from "tiny" to "Huge".
 Default is "Large".
+\item \code{state_font_size} font size in LaTeX for the latent process states This
+can be any LaTeX font size from "tiny" to "Huge". Default is "normalsize".
+\item \code{resp_font_size} font size in LaTeX for the possible responses. This
+can be any LaTeX font size from "tiny" to "Huge". Default is "normalsize".
 }}
 }
 \value{

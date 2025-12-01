@@ -1,10 +1,15 @@
 
 ######### CONSTANTS #########
 
-begin_lines <- function() {
+begin_lines <- function(stim_font_size, probs_font_size, resp_font_size, state_font_size) {
   c("\\documentclass[tikz,border=2pt]{standalone}",
     "",
     "\\usepackage{tikz}",
+    "",
+    paste0("\\newcommand{\\stimFontSize}{\\", stim_font_size, "}"),
+    paste0("\\newcommand{\\probsFontSize}{\\", probs_font_size, "}"),
+    paste0("\\newcommand{\\respFontSize}{\\", resp_font_size, "}"),
+    paste0("\\newcommand{\\stateFontSize}{\\", state_font_size, "}"),
     "",
     "\\begin{document}",
     "",
@@ -49,10 +54,16 @@ get_default <- function() {
     stim_txt_dist_y = 0.5,
 
     # stimulus text size
-    stim_txt_size = "large",
+    stim_font_size = "large",
 
-    # size probability parameters
-    probs_size = "Large"
+    # font size probability parameters
+    probs_font_size = "Large",
+
+    # font size latent states
+    state_font_size = "normalsize",
+
+    # font size probability parameters
+    resp_font_size = "normalsize"
   )
 }
 
