@@ -2,7 +2,11 @@
 ######### CONSTANTS #########
 
 begin_lines <- function(stim_font_size, probs_font_size, resp_font_size, state_font_size) {
-  c("\\documentclass[tikz,border=2pt]{standalone}",
+  c(
+    paste0("% Table created by MPTplot ", packageVersion("MPTplot"), " by Raphael Hartmann. E-mail: raphael.hartmann at protonmail.com"),
+    paste0("% Date and time: ", format(Sys.time(), "%Y-%m-%d - %H:%M:%S")),
+    "",
+    "\\documentclass[tikz,border=2pt]{standalone}",
     "",
     "\\usepackage{tikz}",
     "",
