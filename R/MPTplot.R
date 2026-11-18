@@ -223,7 +223,7 @@ MPTplot <- function(mdl, mode = "combine", stimuli = NULL, responses = NULL, sta
     stim_texts <- rev(stim_names)
     for (tr in 1:n.trees) {
       pos_x <- total_width - tr*(resp_box_width+resp_box_dist_x) + resp_box_dist_x
-      tex_lines <- c(tex_lines, paste0("\\node[anchor=west] at (", pos_x, ", ", total_height, ") {\\stimFontSize ", stim_texts[tr], "};"), "")
+      tex_lines <- c(tex_lines, paste0("\\node[anchor=west,align=center] at (", pos_x, ", ", total_height, ") {\\stimFontSize ", stim_texts[tr], "};"), "")
       for (br in 1:n.branches[tr]) {
         pos_y <- body_height - (br-1)*(resp_box_height+resp_box_dist_y)
         tex_lines <- c(tex_lines, paste0("\\draw [thick] (", pos_x, ", ", pos_y-resp_box_height, ") rectangle (", pos_x + resp_box_width, ", ", pos_y, ") node[pos=.5] {\\begin{tabular}{cc} \\respFontSize ", cat_names[[tr]][trees$ordered_cat_pos[[n.trees+1-tr]]][br], " \\end{tabular}};"))
